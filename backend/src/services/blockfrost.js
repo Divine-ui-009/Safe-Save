@@ -3,20 +3,35 @@ import { AppError } from '../middleware/errorHandler.js';
 
 class BlockfrostService {
   constructor() {
-    if (!process.env.BLOCKFROST_PROJECT_ID) {
-      throw new Error('BLOCKFROST_PROJECT_ID is not set');
+    // Lazy initialization - API will be created on first use
+    this._api = null;
+  }
+
+  get api() {
+    if (!this._api) {
+      const projectId = process.env.BLOCKFROST_PROJECT_ID;
+      const network = process.env.BLOCKFROST_NETWORK;
+      
+      if (!projectId) {
+        throw new Error('BLOCKFROST_PROJECT_ID is not set in environment variables');
+      }
+      
+      this._api = new BlockFrostAPI({
+        projectId: projectId,
+        network: network
+      });
     }
-    
-    this.api = new BlockFrostAPI({
-      projectId: process.env.BLOCKFROST_PROJECT_ID,
-      network: process.env.BLOCKFROST_NETWORK || 'preprod'
-    });
+    return this._api;
   }
 
   async getAddressUtxos(address) {
     try {
       return await this.api.addressesUtxos(address);
     } catch (error) {
+      // If address not found or has no UTxOs, return empty array
+      if (error.status_code === 404 || error.message.includes('not been found')) {
+        return [];
+      }
       throw new AppError(`Failed to fetch UTxOs: ${error.message}`, 500);
     }
   }
@@ -25,6 +40,10 @@ class BlockfrostService {
     try {
       return await this.api.addressesUtxos(scriptAddress);
     } catch (error) {
+      // If address not found or has no UTxOs, return empty array
+      if (error.status_code === 404 || error.message.includes('not been found')) {
+        return [];
+      }
       throw new AppError(`Failed to fetch script UTxOs: ${error.message}`, 500);
     }
   }

@@ -1,14 +1,15 @@
+import dotenv from 'dotenv';
+
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import authRoutes from './routes/auth.js';
 import savingsRoutes from './routes/savings.js';
 import loanRoutes from './routes/loan.js';
 import investmentRoutes from './routes/investment.js';
 import rewardsRoutes from './routes/rewards.js';
 import { errorHandler } from './middleware/errorHandler.js';
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,7 +24,7 @@ app.get('/health', (req, res) => {
   res.json({ 
     status: 'ok', 
     timestamp: new Date().toISOString(),
-    network: process.env.BLOCKFROST_NETWORK || 'preprod'
+    network: process.env.BLOCKFROST_NETWORK || 'preview'
   });
 });
 

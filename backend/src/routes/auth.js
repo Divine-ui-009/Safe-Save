@@ -5,7 +5,6 @@ import { authenticateWallet } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Connect wallet and get JWT token
 router.post('/connect-wallet', async (req, res, next) => {
   try {
     const { walletAddress, stakeAddress, signature } = req.body;
@@ -14,9 +13,6 @@ router.post('/connect-wallet', async (req, res, next) => {
       throw new AppError('Wallet address is required', 400);
     }
 
-    // TODO: Verify signature to ensure wallet ownership
-    // For now, we'll trust the wallet address (NOT PRODUCTION READY)
-    // In production, verify the signature against a challenge message
 
     const token = jwt.sign(
       { 
