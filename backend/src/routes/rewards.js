@@ -5,7 +5,6 @@ import blockfrostService from '../services/blockfrost.js';
 
 const router = express.Router();
 
-// Get user rewards/badges
 router.get('/:walletAddress', authenticateWallet, async (req, res, next) => {
   try {
     const { walletAddress } = req.params;
@@ -15,14 +14,24 @@ router.get('/:walletAddress', authenticateWallet, async (req, res, next) => {
       throw new AppError('Rewards contract address not configured', 500);
     }
 
-    const assets = await blockfrostService.api.addressesAssets(walletAddress);
+    let assets = [];
+    try {
+      assets = await blockfrostService.api.addressesExtended(walletAddress);
+    } catch (error) {
+      // If address not found or has no assets, return empty array
+      if (error.status_code === 404 || error.message.includes('not been found')) {
+        assets = [];
+      } else {
+        throw error;
+      }
+    }
     
-    const badges = assets
-      .filter(asset => asset.unit.startsWith(rewardsContractAddress))
+    const badges = (assets.amount || [])
+      .filter(asset => asset.unit !== 'lovelace' && asset.unit.startsWith(rewardsContractAddress))
       .map(asset => ({
         assetId: asset.unit,
         quantity: asset.quantity,
-        name: this.decodeBadgeName(asset.unit)
+        name: decodeBadgeName(asset.unit)
       }));
 
     res.json({
@@ -77,7 +86,7 @@ router.get('/eligibility/:walletAddress', authenticateWallet, async (req, res, n
     const eligibility = {
       streakBadge: {
         eligible: false,
-        currentStreak:currentStreak,
+        currentStreak: 0,
         requiredStreak: 10,
         reason: 'Need 10+ consecutive savings'
       },
@@ -86,7 +95,8 @@ router.get('/eligibility/:walletAddress', authenticateWallet, async (req, res, n
         reason: 'No early loan repayments found'
       }
     };
-s.json({
+
+    res.json({
       success: true,
       walletAddress,
       eligibility

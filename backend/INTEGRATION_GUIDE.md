@@ -1,3 +1,0 @@
-# Frontend Integration Guide
-
-## 🎯 Overvi
