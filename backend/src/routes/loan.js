@@ -6,7 +6,43 @@ import cardanoService from '../services/cardano.js';
 
 const router = express.Router();
 
-// Get loan status for user
+/**
+ * @swagger
+ * /api/loan/status/{walletAddress}:
+ *   get:
+ *     summary: Get loan status for user
+ *     description: Retrieve all loans and their status for a specific wallet
+ *     tags: [Loans]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: walletAddress
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Cardano wallet address
+ *         example: addr_test1qz...
+ *     responses:
+ *       200:
+ *         description: Loan status retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/LoanStatus'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.get('/status/:walletAddress', authenticateWallet, async (req, res, next) => {
   try {
     const { walletAddress } = req.params;
@@ -57,7 +93,41 @@ router.get('/status/:walletAddress', authenticateWallet, async (req, res, next) 
   }
 });
 
-// Request a loan
+/**
+ * @swagger
+ * /api/loan/request:
+ *   post:
+ *     summary: Request a loan
+ *     description: Submit a loan request with specified amount and duration
+ *     tags: [Loans]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/LoanRequest'
+ *     responses:
+ *       200:
+ *         description: Loan request prepared successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/LoanRequestResponse'
+ *       400:
+ *         description: Invalid request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.post('/request', authenticateWallet, async (req, res, next) => {
   try {
     const { amount, durationDays } = req.body;
@@ -101,7 +171,41 @@ router.post('/request', authenticateWallet, async (req, res, next) => {
   }
 });
 
-// Repay loan
+/**
+ * @swagger
+ * /api/loan/repay:
+ *   post:
+ *     summary: Repay a loan
+ *     description: Make a repayment towards an existing loan
+ *     tags: [Loans]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/RepaymentRequest'
+ *     responses:
+ *       200:
+ *         description: Repayment transaction prepared successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/RepaymentResponse'
+ *       400:
+ *         description: Invalid request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.post('/repay', authenticateWallet, async (req, res, next) => {
   try {
     const { amount, loanUtxoRef } = req.body;

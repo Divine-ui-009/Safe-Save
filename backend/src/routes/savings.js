@@ -6,7 +6,43 @@ import cardanoService from '../services/cardano.js';
 
 const router = express.Router();
 
-// Get user savings data
+/**
+ * @swagger
+ * /api/savings/{walletAddress}:
+ *   get:
+ *     summary: Get user savings data
+ *     description: Retrieve savings information for a specific wallet address
+ *     tags: [Savings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: walletAddress
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Cardano wallet address
+ *         example: addr_test1qz...
+ *     responses:
+ *       200:
+ *         description: Savings data retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SavingsData'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.get('/:walletAddress', authenticateWallet, async (req, res, next) => {
   try {
     const { walletAddress } = req.params;
@@ -67,7 +103,29 @@ router.get('/:walletAddress', authenticateWallet, async (req, res, next) => {
   }
 });
 
-// Get group savings total
+/**
+ * @swagger
+ * /api/savings/group/total:
+ *   get:
+ *     summary: Get total group savings
+ *     description: Retrieve the total savings amount for the entire group
+ *     tags: [Savings]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Group total retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/GroupTotal'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.get('/group/total', authenticateWallet, async (req, res, next) => {
   try {
     const savingsContractAddress = process.env.SAVINGS_CONTRACT_ADDRESS;
@@ -103,7 +161,41 @@ router.get('/group/total', authenticateWallet, async (req, res, next) => {
   }
 });
 
-// Prepare deposit transaction
+/**
+ * @swagger
+ * /api/savings/deposit/prepare:
+ *   post:
+ *     summary: Prepare a deposit transaction
+ *     description: Prepare a transaction for depositing funds into savings
+ *     tags: [Savings]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/DepositRequest'
+ *     responses:
+ *       200:
+ *         description: Deposit transaction prepared successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/DepositResponse'
+ *       400:
+ *         description: Invalid request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.post('/deposit/prepare', authenticateWallet, async (req, res, next) => {
   try {
     const { amount } = req.body; // Amount in ADA
@@ -135,7 +227,37 @@ router.post('/deposit/prepare', authenticateWallet, async (req, res, next) => {
   }
 });
 
-// Get user streak
+/**
+ * @swagger
+ * /api/savings/streak/{walletAddress}:
+ *   get:
+ *     summary: Get user savings streak
+ *     description: Retrieve the consecutive savings streak for a wallet
+ *     tags: [Savings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: walletAddress
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Cardano wallet address
+ *         example: addr_test1qz...
+ *     responses:
+ *       200:
+ *         description: Streak retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/StreakResponse'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.get('/streak/:walletAddress', authenticateWallet, async (req, res, next) => {
   try {
     const { walletAddress } = req.params;

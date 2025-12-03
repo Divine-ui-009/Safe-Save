@@ -60,6 +60,24 @@ npm run dev
 npm start
 ```
 
+## 📚 API Documentation
+
+The API includes comprehensive **Swagger/OpenAPI documentation** for easy exploration and testing.
+
+### Access Interactive Documentation
+
+Once the server is running, visit:
+
+**http://localhost:3000/api-docs**
+
+The Swagger UI provides:
+- Complete API reference with request/response examples
+- Interactive "Try it out" feature to test endpoints
+- Authentication support
+- Schema definitions for all data models
+
+For detailed information, see [SWAGGER_GUIDE.md](./SWAGGER_GUIDE.md)
+
 ## 📡 API Endpoints
 
 ### Authentication
@@ -340,7 +358,7 @@ curl -H "Authorization: Bearer YOUR_TOKEN" \
 - [ ] Add request validation middleware
 - [ ] Add rate limiting
 - [ ] Add logging (Winston/Pino)
-- [ ] Add API documentation (Swagger/OpenAPI)
+- [x] Add API documentation (Swagger/OpenAPI)
 - [ ] Add unit and integration tests
 - [ ] Add monitoring and alerting
 - [ ] Implement WebSocket for real-time updates

@@ -5,6 +5,37 @@ import blockfrostService from '../services/blockfrost.js';
 
 const router = express.Router();
 
+/**
+ * @swagger
+ * /api/rewards/{walletAddress}:
+ *   get:
+ *     summary: Get user badges
+ *     description: Retrieve all NFT badges owned by a wallet
+ *     tags: [Rewards]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: walletAddress
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Cardano wallet address
+ *         example: addr_test1qz...
+ *     responses:
+ *       200:
+ *         description: Badges retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/BadgesResponse'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.get('/:walletAddress', authenticateWallet, async (req, res, next) => {
   try {
     const { walletAddress } = req.params;
@@ -44,7 +75,44 @@ router.get('/:walletAddress', authenticateWallet, async (req, res, next) => {
   }
 });
 
-// Claim a badge
+/**
+ * @swagger
+ * /api/rewards/claim/{badgeType}:
+ *   post:
+ *     summary: Claim a badge
+ *     description: Claim an NFT badge based on achievements (streak or early-repay)
+ *     tags: [Rewards]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: badgeType
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [streak, early-repay]
+ *         description: Type of badge to claim
+ *         example: streak
+ *     responses:
+ *       200:
+ *         description: Badge claim prepared successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/BadgeClaimResponse'
+ *       400:
+ *         description: Invalid badge type
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.post('/claim/:badgeType', authenticateWallet, async (req, res, next) => {
   try {
     const { badgeType } = req.params;
@@ -75,7 +143,37 @@ router.post('/claim/:badgeType', authenticateWallet, async (req, res, next) => {
   }
 });
 
-// Check badge eligibility
+/**
+ * @swagger
+ * /api/rewards/eligibility/{walletAddress}:
+ *   get:
+ *     summary: Check badge eligibility
+ *     description: Check if a wallet is eligible for any badges
+ *     tags: [Rewards]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: walletAddress
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Cardano wallet address
+ *         example: addr_test1qz...
+ *     responses:
+ *       200:
+ *         description: Eligibility checked successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/EligibilityResponse'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.get('/eligibility/:walletAddress', authenticateWallet, async (req, res, next) => {
   try {
     const { walletAddress } = req.params;
