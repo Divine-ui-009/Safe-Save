@@ -6,7 +6,35 @@ import cardanoService from '../services/cardano.js';
 
 const router = express.Router();
 
-// List all investments
+/**
+ * @swagger
+ * /api/investment/list:
+ *   get:
+ *     summary: List all investments
+ *     description: Retrieve a list of all investments with summary statistics
+ *     tags: [Investments]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Investments retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/InvestmentList'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.get('/list', authenticateWallet, async (req, res, next) => {
   try {
     const investmentContractAddress = process.env.INVESTMENT_CONTRACT_ADDRESS;
@@ -58,7 +86,49 @@ router.get('/list', authenticateWallet, async (req, res, next) => {
   }
 });
 
-// Get specific investment
+/**
+ * @swagger
+ * /api/investment/{id}:
+ *   get:
+ *     summary: Get specific investment
+ *     description: Retrieve details of a specific investment by ID
+ *     tags: [Investments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Investment ID
+ *         example: INV-001
+ *     responses:
+ *       200:
+ *         description: Investment retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 investment:
+ *                   type: object
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Investment not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.get('/:id', authenticateWallet, async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -102,7 +172,41 @@ router.get('/:id', authenticateWallet, async (req, res, next) => {
   }
 });
 
-// Register new investment
+/**
+ * @swagger
+ * /api/investment/register:
+ *   post:
+ *     summary: Register a new investment
+ *     description: Register a new investment project with expected ROI
+ *     tags: [Investments]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/InvestmentRegisterRequest'
+ *     responses:
+ *       200:
+ *         description: Investment registration prepared successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/InvestmentRegisterResponse'
+ *       400:
+ *         description: Invalid request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.post('/register', authenticateWallet, async (req, res, next) => {
   try {
     const { projectName, amount, expectedROI } = req.body;
