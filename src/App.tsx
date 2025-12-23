@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Toaster } from 'sonner';
+import { useState, useEffect } from 'react';
+import { Toaster, toast } from 'sonner';
 import { LoginScreen } from './components/LoginScreen';
 import { SignUpForm } from './components/SignUpForm';
 import { SignInForm } from './components/SignInForm';
@@ -20,6 +20,8 @@ import { AdminInvestments } from './components/AdminInvestments';
 import { AdminMembers } from './components/AdminMembers';
 import { AdminAlerts } from './components/AdminAlerts';
 
+type AdminScreen = 'home' | 'savings' | 'loans' | 'investments' | 'members' | 'alerts' | 'reports';
+
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
@@ -29,8 +31,32 @@ export default function App() {
   const [fromSignUp, setFromSignUp] = useState(false);
   const [userType, setUserType] = useState<'member' | 'admin'>('member');
   const [activeScreen, setActiveScreen] = useState('dashboard');
-  const [adminScreen, setAdminScreen] = useState<'home' | 'savings' | 'loans' | 'investments' | 'members' | 'alerts'>('home');
+  const [adminScreen, setAdminScreen] = useState<'home' | 'savings' | 'loans' | 'investments' | 'members' | 'alerts' | 'reports'>('home');
   const [currentUser, setCurrentUser] = useState<any>(null);
+
+  // Check for existing admin session on initial load
+  useEffect(() => {
+    const adminToken = localStorage.getItem('admin_token');
+    if (adminToken) {
+      try {
+        // Verify the token (in a real app, this would be more secure)
+        const tokenData = JSON.parse(atob(adminToken));
+        const tokenAge = Date.now() - tokenData.timestamp;
+        const maxTokenAge = 24 * 60 * 60 * 1000; // 24 hours
+        
+        if (tokenAge < maxTokenAge) {
+          setUserType('admin');
+          setIsLoggedIn(true);
+        } else {
+          // Token expired, remove it
+          localStorage.removeItem('admin_token');
+        }
+      } catch (error) {
+        console.error('Error parsing admin token:', error);
+        localStorage.removeItem('admin_token');
+      }
+    }
+  }, []);
 
   const handleLogin = () => {
     // Get current user from localStorage
@@ -46,6 +72,12 @@ export default function App() {
   };
 
   const handleAdminLogin = () => {
+    const adminToken = localStorage.getItem('admin_token');
+    if (!adminToken) {
+      toast.error('Authentication failed. Please try again.');
+      return;
+    }
+    
     setCurrentUser(null);
     setUserType('admin');
     setIsLoggedIn(true);
@@ -66,7 +98,6 @@ export default function App() {
   };
 
   const handleShowSignIn = () => {
-    // Show unified sign in form for members
     setShowSignIn(true);
     setShowAdminSignIn(false);
     setShowSignUp(false);
@@ -74,7 +105,6 @@ export default function App() {
   };
 
   const handleShowAdminSignIn = () => {
-    // Show admin sign in form
     setShowAdminSignIn(true);
     setShowSignIn(false);
     setShowSignUp(false);
@@ -122,7 +152,7 @@ export default function App() {
       return <AdminSignInForm onSignIn={handleAdminLogin} onBack={handleBackToLogin} />;
     }
     if (showSignIn) {
-      return <SignInForm onSignIn={handleLogin} onBack={handleBackToLogin} onWalletSignIn={handleShowWalletConnect} />;
+      return <SignInForm onSignInSuccess={handleLogin} onBack={handleBackToLogin} onWalletSignIn={handleShowWalletConnect} />;
     }
     if (showSignUp) {
       return <SignUpForm onSignUp={handleSignUpComplete} onBack={handleBackToLogin} />;
@@ -146,7 +176,7 @@ export default function App() {
           <div className="max-w-md mx-auto bg-white min-h-screen relative shadow-xl">
             <AdminLayout
               activeScreen={adminScreen}
-              onNavigate={setAdminScreen}
+              onNavigate={(screen) => setAdminScreen(screen as any)}
             >
               {adminScreen === 'home' && (
                 <AdminHome onNavigate={setAdminScreen} />

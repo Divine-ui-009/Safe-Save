@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { TrendingUp, Plus, DollarSign, PieChart, Award, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, PieChart as RechartsPie, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { savingsAPI } from '../api';
 
 const demoSavingsData = [
   { month: 'Jan', amount: 1200 },
@@ -24,6 +25,8 @@ interface DashboardProps {
 export function Dashboard({ onNavigate }: DashboardProps) {
   const [currentUser, setCurrentUser] = useState<any | null>(null);
   const [savingsHistory, setSavingsHistory] = useState<any[]>(demoSavingsData);
+  const [groupTotal, setGroupTotal] = useState<number | null>(null);
+  const [walletSavings, setWalletSavings] = useState<number | null>(null);
 
   useEffect(() => {
     try {
@@ -34,6 +37,36 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     } catch {
       // ignore parse errors and keep defaults
     }
+  }, []);
+
+  useEffect(() => {
+    const loadFromBackend = async () => {
+      try {
+        const walletAddress = localStorage.getItem('walletAddress');
+        if (!walletAddress) return;
+
+        const [groupRes, userRes] = await Promise.all([
+          savingsAPI.getGroupTotal(),
+          savingsAPI.getUserSavings(walletAddress),
+        ]);
+
+        const group = groupRes.data;
+        const user = userRes.data;
+
+        if (typeof group?.groupTotal === 'number') {
+          setGroupTotal(group.groupTotal);
+        }
+
+        const savings = user?.savings;
+        if (typeof savings?.totalSavings === 'number') {
+          setWalletSavings(savings.totalSavings);
+        }
+      } catch {
+        // ignore and fall back to local/demo state
+      }
+    };
+
+    void loadFromBackend();
   }, []);
 
   useEffect(() => {
@@ -50,7 +83,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   const fullName = currentUser?.fullName || 'Member';
   const firstName = fullName.split(' ')[0];
 
-  const userSavings = currentUser?.savings ?? 0;
+  const userSavings = walletSavings ?? (currentUser?.savings ?? 0);
   const userWalletBalance = currentUser?.walletBalance ?? 0;
   const userLoanBalance = currentUser?.loanBalance ?? 0;
   const userInvestmentProfit = currentUser?.investmentProfit ?? 0;
@@ -82,7 +115,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
           
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
             <p className="text-emerald-100 text-sm mb-1">Group Savings</p>
-            <h3 className="text-white">₳45,890</h3>
+            <h3 className="text-white">₳{(groupTotal ?? 45890).toLocaleString()}</h3>
             <div className="flex items-center gap-1 mt-2">
               <ArrowUpRight className="w-4 h-4 text-emerald-200" />
               <span className="text-emerald-200 text-sm">+8.3%</span>

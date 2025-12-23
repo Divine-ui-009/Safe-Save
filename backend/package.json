@@ -21,10 +21,13 @@
     "@blockfrost/blockfrost-js": "^5.4.0",
     "@emurgo/cardano-serialization-lib-nodejs": "^12.0.0",
     "axios": "^1.6.2",
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
+    "mongoose": "^7.8.4",
+    "mongodb": "^7.0.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
   },

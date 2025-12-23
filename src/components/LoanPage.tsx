@@ -1,6 +1,6 @@
 import { DollarSign, AlertCircle, Clock, TrendingDown, CheckCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 const loanRules = [
   { label: 'Max Borrow', value: '50% of savings' },
