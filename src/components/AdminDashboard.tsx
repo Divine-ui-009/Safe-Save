@@ -1,6 +1,6 @@
 import { Users, Copy, CheckCircle, Shield, TrendingUp, Clock, Search, Plus, Key, Trash2, X, DollarSign, Bell } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 const initialMembers = [
   {
