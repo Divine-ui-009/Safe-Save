@@ -1,4 +1,7 @@
 import { Wallet, ArrowLeft, CheckCircle, ExternalLink } from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { authAPI } from '../api';
 
 interface WalletConnectFormProps {
   onConnect: () => void;
@@ -38,13 +41,36 @@ const wallets = [
 ];
 
 export function WalletConnectForm({ onConnect, onBack, fromSignUp = false }: WalletConnectFormProps) {
+  const [isConnecting, setIsConnecting] = useState(false);
+
   const handleWalletClick = (walletId: string, available: boolean) => {
-    if (available) {
-      // Simulate wallet connection
-      setTimeout(() => {
+    if (!available || isConnecting) return;
+
+    const connect = async () => {
+      try {
+        setIsConnecting(true);
+
+        // TODO: Replace with real CIP-30 wallet integration.
+        // For now, we just generate a placeholder wallet address.
+        const walletAddress = `addr_test1_${walletId}_${Date.now()}`;
+
+        const response = await authAPI.connectWallet({ walletAddress });
+        const { token } = response.data;
+
+        localStorage.setItem('token', token);
+        localStorage.setItem('walletAddress', walletAddress);
+
+        toast.success('Wallet connected');
         onConnect();
-      }, 1000);
-    }
+      } catch (error: any) {
+        const message = error?.response?.data?.error || 'Failed to connect wallet';
+        toast.error(message);
+      } finally {
+        setIsConnecting(false);
+      }
+    };
+
+    void connect();
   };
 
   return (

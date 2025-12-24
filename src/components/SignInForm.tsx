@@ -1,25 +1,44 @@
-import { useState } from 'react';
-import { ArrowLeft, Wallet, Mail, Lock } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { useState, FormEvent } from 'react';
+import { ArrowLeft, Wallet, Mail, Lock, Loader2 } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
+import { toast } from 'sonner';
 
 interface SignInFormProps {
-  onSignIn: () => void;
   onBack: () => void;
   onWalletSignIn?: () => void;
+  onSignInSuccess?: () => void;
 }
 
-export function SignInForm({ onSignIn, onBack, onWalletSignIn }: SignInFormProps) {
+export function SignInForm({ onBack, onWalletSignIn, onSignInSuccess }: SignInFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { login } = useAuth();
 
-  const handleSignIn = () => {
-    onSignIn();
+  const handleSignIn = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const success = await login(email, password);
+      if (success && onSignInSuccess) {
+        onSignInSuccess();
+      }
+    } catch (error) {
+      console.error('Sign in error:', error);
+      toast.error('Failed to sign in. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      handleSignIn();
+      handleSignIn(e as any);
     }
   };
 
@@ -37,13 +56,13 @@ export function SignInForm({ onSignIn, onBack, onWalletSignIn }: SignInFormProps
       </div>
 
       {/* Content */}
-      <div className="px-6 max-w-md mx-auto">
+      <form onSubmit={handleSignIn} className="px-6 max-w-md mx-auto">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
           <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-3xl shadow-lg flex items-center justify-center mb-4">
             <Wallet className="w-10 h-10 text-white" strokeWidth={2.5} />
           </div>
-          <h2 className="text-emerald-600 mb-2">Welcome Back</h2>
+          <h2 className="text-emerald-600 mb-2 text-2xl font-semibold">Welcome Back</h2>
           <p className="text-slate-600 text-center">
             Sign in to your Safe-Save account
           </p>
@@ -52,35 +71,39 @@ export function SignInForm({ onSignIn, onBack, onWalletSignIn }: SignInFormProps
         {/* Form */}
         <div className="bg-white rounded-2xl shadow-lg p-6 space-y-5">
           {/* Email Field */}
-          <div>
-            <label className="text-slate-700 text-sm mb-2 block">Email Address</label>
+          <div className="space-y-4 mb-6">
+            {/* Email Input */}
             <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Mail className="h-5 w-5 text-slate-400" />
+              </div>
               <input
                 type="email"
-                placeholder="your.email@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                onKeyPress={handleKeyPress}
-                className="w-full pl-12 pr-4 py-3 border-2 border-slate-200 rounded-xl focus:border-emerald-500 focus:outline-none transition-colors"
+                onKeyDown={handleKeyPress}
+                placeholder="Email address"
                 disabled={isLoading}
+                className="block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-xl bg-white text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 disabled:opacity-70"
+                required
               />
             </div>
-          </div>
 
-          {/* Password Field */}
-          <div>
-            <label className="text-slate-700 text-sm mb-2 block">Password</label>
+            {/* Password Input */}
             <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Lock className="h-5 w-5 text-slate-400" />
+              </div>
               <input
                 type="password"
-                placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                onKeyPress={handleKeyPress}
-                className="w-full pl-12 pr-4 py-3 border-2 border-slate-200 rounded-xl focus:border-emerald-500 focus:outline-none transition-colors"
+                onKeyDown={handleKeyPress}
+                placeholder="Password"
                 disabled={isLoading}
+                className="block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-xl bg-white text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 disabled:opacity-70"
+                required
+                minLength={6}
               />
             </div>
           </div>
@@ -94,13 +117,13 @@ export function SignInForm({ onSignIn, onBack, onWalletSignIn }: SignInFormProps
 
           {/* Sign In Button */}
           <button
-            onClick={handleSignIn}
+            type="submit"
             disabled={isLoading}
-            className="w-full bg-gradient-to-r from-emerald-500 to-green-600 text-white py-4 rounded-xl shadow-lg shadow-green-200 hover:shadow-xl hover:shadow-emerald-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className={`w-full py-3 px-4 rounded-xl font-medium text-white transition-all duration-200 flex items-center justify-center gap-2 ${isLoading ? 'bg-emerald-400' : 'bg-emerald-600 hover:bg-emerald-700'}`}
           >
             {isLoading ? (
               <>
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <Loader2 className="w-5 h-5 animate-spin" />
                 <span>Signing in...</span>
               </>
             ) : (
@@ -138,7 +161,7 @@ export function SignInForm({ onSignIn, onBack, onWalletSignIn }: SignInFormProps
             Join a Group
           </button>
         </p>
-      </div>
+      </form>
     </div>
   );
 }

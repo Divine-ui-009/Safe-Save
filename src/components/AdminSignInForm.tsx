@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ArrowLeft, Shield, Mail, Lock } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 interface AdminSignInFormProps {
   onSignIn: () => void;
@@ -12,8 +12,42 @@ export function AdminSignInForm({ onSignIn, onBack }: AdminSignInFormProps) {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSignIn = () => {
-    onSignIn();
+  const handleSignIn = async () => {
+    // Basic validation
+    if (!email || !password) {
+      toast.error('Please enter both email and password');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // In a real app, this would be an API call to your backend
+      // For demo purposes, we'll use a hardcoded admin account
+      const ADMIN_CREDENTIALS = {
+        email: 'admin@safesave.com',
+        password: 'admin123' // In a real app, never store passwords in frontend code
+      };
+
+      if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
+        // Store admin token in localStorage
+        const adminToken = btoa(JSON.stringify({ 
+          email, 
+          timestamp: new Date().getTime() 
+        }));
+        localStorage.setItem('admin_token', adminToken);
+        
+        // Call the onSignIn callback
+        onSignIn();
+      } else {
+        throw new Error('Invalid email or password');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error('Invalid credentials. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -131,7 +165,7 @@ export function AdminSignInForm({ onSignIn, onBack }: AdminSignInFormProps) {
             onClick={onBack}
             className="text-purple-600 hover:text-purple-700 transition-colors"
           >
-            Create Group
+            Contact Support
           </button>
         </p>
       </div>

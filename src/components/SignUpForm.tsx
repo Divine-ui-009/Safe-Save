@@ -1,6 +1,6 @@
 import { Users, ArrowLeft, User, Mail, Phone, MapPin, Lock } from 'lucide-react';
 import { useState } from 'react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 interface SignUpFormProps {
   onSignUp: (accountType: 'member' | 'admin', userData: any) => void;

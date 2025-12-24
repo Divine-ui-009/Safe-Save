@@ -1,6 +1,6 @@
 import { Shield, TrendingUp, DollarSign, Users, Link as LinkIcon, PieChart as PieChartIcon, ArrowRight, ArrowDown } from 'lucide-react';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 const savingsVsLoansData = [
   { name: 'Jan', savings: 12000, loans: 4000 },
